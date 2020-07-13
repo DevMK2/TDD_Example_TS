@@ -1,4 +1,4 @@
-import {Money} from '../src/money';
+import {Bank, Sum, Money} from '../src/money';
 
 // 주기는 다음과 같다.
 // 1. 작은 테스트를 하나 추가한다
@@ -6,6 +6,16 @@ import {Money} from '../src/money';
 // 3. 조금 수정한다.
 // 4. 모든 테스트를 실행해서 테스트가 성공하는 것을 확인한다.
 // 5. 중복을 제거하기 위해 리팩토링 한다.
+
+describe('Test 통화 개념', ()=>{
+  test('For USD', ()=>{
+    expect('USD').toEqual(Money.dollar(1).currency);
+  });
+
+  test('For CHF', ()=>{
+    expect('CHF').toEqual(Money.franc(1).currency);
+  });
+});
 
 describe('Test times()', ()=>{
   test('For Dollar', ()=>{
@@ -61,5 +71,23 @@ describe('Test equal()', ()=>{
     const fiveFranc = Money.franc(5);
 
     expect(fiveDollar.equals(fiveFranc)).toBeFalsy();
+  });
+});
+
+describe('Test simple addition', ()=>{
+  test('For dollar', ()=>{
+    const sum = new Sum(Money.dollar(3), Money.dollar(4));
+    const bank = new Bank();
+    const result= bank.reduce(sum, 'USD');
+    expect(result.equals(Money.dollar(7))).toBeTruthy();
+  });
+});
+
+describe('Test bank reduce', ()=>{
+  test('Dollar reduce', ()=>{
+    const bank = new Bank();
+    const result = bank.reduce(Money.dollar(1), 'USD');
+
+    expect(result.equals(Money.dollar(1))).toBeTruthy();
   });
 });
