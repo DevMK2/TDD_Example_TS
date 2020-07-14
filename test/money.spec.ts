@@ -41,6 +41,19 @@ describe('Test times()', ()=>{
       five.times(3).equals(Money.franc(15))
     ).toBeTruthy();
   });
+
+  test('For Sum expression', () => {
+    const bank = new Bank;
+    bank.addRate('CHF', 'USD', 2);
+
+    const fiveDollar = Money.dollar(5);
+    const tenFranc = Money.franc(10);
+
+    const sum = new Sum(fiveDollar, tenFranc).times(2);
+    const result: Money = bank.reduce(sum, 'USD');
+
+    expect(result.equals(Money.dollar(20))).toBeTruthy();
+  });
 });
 
 describe('Test equal()', ()=>{
@@ -66,11 +79,12 @@ describe('Test equal()', ()=>{
     expect(five.equals(Money.franc(6))).toBeFalsy();
   });
 
-  test('Dollar is not a Franc', ()=>{
+  test('Dollar and Franc are different', ()=>{
     const fiveDollar = Money.dollar(5);
     const fiveFranc = Money.franc(5);
 
     expect(fiveDollar.equals(fiveFranc)).toBeFalsy();
+    expect(fiveFranc.equals(fiveDollar)).toBeFalsy();
   });
 });
 
@@ -81,6 +95,30 @@ describe('Test simple addition', ()=>{
     const result= bank.reduce(sum, 'USD');
     expect(result.equals(Money.dollar(7))).toBeTruthy();
   });
+
+  test('Mixed addition $5 + 10CHF = $10', () => {
+    const bank = new Bank;
+    bank.addRate('CHF', 'USD', 2);
+
+    const result = bank.reduce(
+      new Sum(Money.dollar(5), Money.franc(10)), 'USD'
+    );
+
+    expect(result.equals(Money.dollar(10))).toBeTruthy();
+  })
+
+  test('Sum Plus Money', () => {
+    const bank = new Bank;
+    bank.addRate('CHF', 'USD', 2);
+
+    const fiveDollar = Money.dollar(5);
+    const tenFranc = Money.franc(10);
+
+    const sum = new Sum(fiveDollar, tenFranc).plus(fiveDollar);
+    const result: Money = bank.reduce(sum, 'USD');
+
+    expect(result.equals(Money.dollar(15))).toBeTruthy();
+  });
 });
 
 describe('Test bank reduce', ()=>{
@@ -89,5 +127,29 @@ describe('Test bank reduce', ()=>{
     const result = bank.reduce(Money.dollar(1), 'USD');
 
     expect(result.equals(Money.dollar(1))).toBeTruthy();
+  });
+
+  test('Reduce money dollar to dollar', () => {
+    const bank = new Bank();
+    bank.addRate('USD', 'USD', 2);
+
+    const result = bank.reduce(Money.dollar(2), 'USD');
+    expect(result.equals(Money.dollar(2))).toBeTruthy();
+  });
+
+  test('Reduce money franc to dollar', () => {
+    const bank = new Bank();
+    bank.addRate('CHF', 'USD', 2);
+
+    const result = bank.reduce(Money.franc(2), 'USD');
+    expect(result.equals(Money.dollar(1))).toBeTruthy();
+  });
+
+  test('Reduce money dollar to franc', () => {
+    const bank = new Bank();
+    bank.addRate('CHF', 'USD', 2);
+
+    const result = bank.reduce(Money.dollar(1), 'CHF');
+    expect(result.equals(Money.franc(2))).toBeTruthy();
   });
 });
